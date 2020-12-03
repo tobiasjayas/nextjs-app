@@ -1,65 +1,45 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import axios from 'axios';
+import Link from 'next/link';
+import React from 'react'
+import ReactMarkdown from 'react-markdown'
 
-export default function Home() {
+const Home = ({  about_us, blogs, error }) => {
+  if (error) {
+    return <div>An error occured: {error.message}</div>;
+  }
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+    <div>
+      <ul>
+      {blogs.map(blog => (
+        <li key={blog.id}>
+          {blog.title}
+          <Link href="/blogs/[id]" as ={`blogs/${blog.slug}`}><a>Detail</a></Link>
+          {blog.image.map(blog_img => (
+            <img key={blog_img.id} width="100" src={"http://64.227.108.114"+blog_img.url}></img>
+          ))}
+          
+        </li>
+      ))}
+    </ul>
+    {about_us.title}
+    
+    <ReactMarkdown>{about_us.intro}</ReactMarkdown>
+    <img width="100" src={"http://64.227.108.114"+about_us.aboutus_image.url}></img>
     </div>
-  )
-}
+  );
+};
+
+Home.getInitialProps = async ctx => {
+  try {
+    const res = await axios.get('http://64.227.108.114/blogs');
+    const aboutus = await axios.get('http://64.227.108.114/about-us');
+    const blogs = res.data;
+    const about_us = aboutus.data;
+    //console.log(blogs);
+    return { blogs, about_us };
+  } catch (error) {
+    return { error };
+  }
+};
+
+export default Home;
